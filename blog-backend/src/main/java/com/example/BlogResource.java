@@ -12,6 +12,7 @@ import com.example.BlogEntry;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
+import io.smallrye.common.annotation.Blocking;
 
 import java.util.List;
 
@@ -25,15 +26,20 @@ public class BlogResource {
     Emitter<ValidationRequest> validationRequestEmitter;
 
     @POST
-    @Transactional
     public Response createBlog(BlogEntry entry) {
-        entry.approved = false;
-        entry.persist();
-        validationRequestEmitter.send(new ValidationRequest(entry.id, entry.title + " " + entry.content));
+        persistBlogEntry(entry); // DB-Transaktion separat ausführen
+        validationRequestEmitter.send(new ValidationRequest(entry.id, entry.title + " " + entry.content)); // Kafka-Emit außerhalb der Transaktion
         return Response.ok(entry).build();
     }
 
+    @Transactional
+    void persistBlogEntry(BlogEntry entry) {
+        entry.approved = false;
+        entry.persist();
+    }
+
     @Incoming("validation-response")
+    @Blocking 
     @Transactional
     public void processValidationResponse(ValidationResponse validationResponse) {
         BlogEntry entry = BlogEntry.findById(validationResponse.id());
