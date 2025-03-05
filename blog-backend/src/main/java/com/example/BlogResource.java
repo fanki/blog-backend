@@ -13,6 +13,8 @@ import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 
+import java.util.List;
+
 @Path("/blogs")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -39,5 +41,12 @@ public class BlogResource {
             entry.approved = validationResponse.valid();
             entry.persist();
         }
+    }
+
+    @GET
+    public List<BlogEntry> listAll() {
+        List<BlogEntry> blogs = BlogEntry.listAll();
+        System.out.println("Blogs gefunden: " + blogs.size());
+        return blogs;
     }
 }
