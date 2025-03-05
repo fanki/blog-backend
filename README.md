@@ -19,22 +19,16 @@ docker network create blog-nw
 
 ## 1️ **MySQL-Datenbank starten**
 
-docker run -d --name=mysql-db --network blog-nw \
-    -e MYSQL_ROOT_PASSWORD=rootpassword \
-    -e MYSQL_DATABASE=blogdb \
-    -e MYSQL_USER=bloguser \
-    -e MYSQL_PASSWORD=blogpassword \
-    -p 3306:3306 mysql:latest
+docker run -d --name mysql-db --network blog-nw -e MYSQL_ROOT_PASSWORD=rootpassword -e MYSQL_DATABASE=blogdb -e MYSQL_USER=bloguser -e MYSQL_PASSWORD=blogpassword -p 3306:3306 mysql:latest
 
 ## 2 **Kafka (Redpanda) Container starten**
 
-docker run -d --name=redpanda-1 -p 9092:9092 --network blog-nw \
-    docker.redpanda.com/redpandadata/redpanda:v23.3.5 \
-    redpanda start --advertise-kafka-addr redpanda-1:9092
+docker run -d --name redpanda-1 --network blog-nw -p 9092:9092 docker.redpanda.com/redpandadata/redpanda:v23.3.5 start --advertise-kafka-addr redpanda-1:9092
 
 ## 3 **Kafka-Topics erstellen**
 
 docker exec -it redpanda-1 rpk topic create validation-request --brokers=localhost:9092
+
 docker exec -it redpanda-1 rpk topic create validation-response --brokers=localhost:9092
 
 ##  **Dienste starten**
