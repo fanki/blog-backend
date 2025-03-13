@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Blog } from './blog.model';
 import { Observable } from 'rxjs';
 
@@ -16,6 +16,7 @@ export class BlogService {
   }
 
   createBlog(blog: Partial<Blog>): Observable<Blog> {
-    return this.http.post<Blog>(this.apiUrl, blog);
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post<Blog>(this.apiUrl, blog, { headers });
   }
 }

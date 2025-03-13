@@ -10,7 +10,7 @@
         name="title"
         type="text"
         class="form-control"
-        placeholder="Gib deinem Blog einen Titel..."
+        placeholder="Mindestens 5 Zeichen..."
         required
       />
     </div>
@@ -23,13 +23,16 @@
         name="content"
         rows="5"
         class="form-control"
-        placeholder="Schreibe hier den Inhalt deines Blogs..."
+        placeholder="Mindestens 10 Zeichen..."
         required
       ></textarea>
     </div>
   
-    <button type="submit" class="btn-primary">
-      Erstellen
-    </button>
+    <button type="submit" class="btn-primary">Erstellen</button>
+  
+    <!-- Toast -->
+    <div *ngIf="showToast" class="toast">
+      ✅ Blog erfolgreich erstellt!
+    </div>
   </form>
   

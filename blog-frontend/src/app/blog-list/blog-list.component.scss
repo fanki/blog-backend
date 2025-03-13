@@ -88,9 +88,16 @@
   
   .approved {
     color: green;
+    font-weight: bold;
   }
   
   .pending {
     color: orange;
+    font-weight: bold;
+  }
+
+  .rejected {
+    color: red;
+    font-weight: bold;
   }
   
