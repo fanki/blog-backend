@@ -159,3 +159,9 @@ Prüfe, ob der `approved`-Status in MySQL korrekt gespeichert wurde:
 
 
 docker exec -it mysql-db mysql -u bloguser -pblogpassword -e "USE blogdb; SELECT * FROM BlogEntry;"
+
+#  **Starten mit Dockercompose**
+docker-compose up --build 
+
+#  **Container löschen**
+docker-compose down -v
