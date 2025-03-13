@@ -124,4 +124,8 @@ echo "GITHUB_PERSONAL_ACCESS_TOKEN" | docker login ghcr.io -u simeonlin --passwo
 docker pull ghcr.io/fanki/blog-backend:1.0.0-SNAPSHOT
 docker pull ghcr.io/fanki/text-validator:1.0.0-SNAPSHOT
 ```
+#  **Starten mit Dockercompose**
+docker-compose up --build 
 
+#  **Container löschen**
+docker-compose down -v
