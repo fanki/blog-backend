@@ -1,0 +1,80 @@
+services:
+  mysql-db:
+    image: mysql:8
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: blogdb
+      MYSQL_USER: bloguser
+      MYSQL_PASSWORD: blogpassword
+    ports:
+      - "3306:3306"
+    networks:
+      - blog-network
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  redpanda-1:
+    image: docker.redpanda.com/redpandadata/redpanda:v23.2.2
+    container_name: redpanda-1
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --memory=512M
+      - --reserve-memory=0M
+      - --overprovisioned
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda-1:9092
+    ports:
+      - "9092:9092"
+    networks:
+      - blog-network
+
+  blog-backend:
+    build: ./blog-backend
+    container_name: blog-backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - secrets.env
+    environment:
+      quarkus.datasource.jdbc.url: jdbc:mysql://mysql-db:3306/blogdb
+      quarkus.datasource.username: bloguser
+      quarkus.datasource.password: blogpassword
+      kafka.bootstrap.servers: redpanda-1:9092
+      QUARKUS_LANGCHAIN4J_OPENAI_API_KEY: ${OPENAI_API_KEY}
+    depends_on:
+      - mysql-db
+      - redpanda-1
+    networks:
+      - blog-network
+
+  text-validator:
+    build: ./text-validator
+    container_name: text-validator
+    environment:
+      kafka.bootstrap.servers: redpanda-1:9092
+    depends_on:
+      - redpanda-1
+    networks:
+      - blog-network
+
+  blog-frontend:
+    build: ./blog-frontend
+    container_name: blog-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - blog-backend
+    networks:
+      - blog-network
+
+networks:
+  blog-network:
+
+volumes:
+  mysql-data:
