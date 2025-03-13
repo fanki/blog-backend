@@ -4,7 +4,7 @@ import { AppComponent } from './app.component';
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AppComponent],
+      imports: [AppComponent], // standalone Komponenten werden direkt importiert
     }).compileComponents();
   });
 
@@ -14,16 +14,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'blog-frontend' title`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('blog-frontend');
-  });
-
-  it('should render title', () => {
+  it(`should display the title 'Blog Übersicht mit KI-Zusammenfassung'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, blog-frontend');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Blog Übersicht mit KI-Zusammenfassung');
   });
 });

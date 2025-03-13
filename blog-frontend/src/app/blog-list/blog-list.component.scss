@@ -1,0 +1,53 @@
+.blog-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .blog-card {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  
+    &:hover {
+      transform: translateY(-4px);
+    }
+  
+    h3 {
+      margin: 0 0 1rem;
+      color: #007bff;
+    }
+  
+    .content {
+      margin-bottom: 1rem;
+      color: #555;
+    }
+  
+    .summary {
+      margin-top: 1rem;
+      font-style: italic;
+      color: #333;
+    }
+  
+    .status {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #fff;
+  
+      &.approved {
+        background-color: #28a745;
+      }
+  
+      &.pending {
+        background-color: #ffc107;
+        color: #000;
+      }
+    }
+  }
+  

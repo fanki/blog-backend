@@ -1,0 +1,11 @@
+<div class="blog-list">
+    <div *ngFor="let blog of blogs" class="blog-card">
+      <h3>{{ blog.title }}</h3>
+      <p class="content">{{ blog.content }}</p>
+      <p class="summary" *ngIf="blog.summary">📝 <strong>Zusammenfassung:</strong> {{ blog.summary }}</p>
+      <span class="status" [ngClass]="blog.approved ? 'approved' : 'pending'">
+        {{ blog.approved ? '✅ Freigegeben' : '⏳ In Prüfung' }}
+      </span>
+    </div>
+  </div>
+  
