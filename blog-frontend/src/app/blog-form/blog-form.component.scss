@@ -1,11 +1,15 @@
 .blog-form {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    background-color: #fafafa;
+    gap: 1.2rem;
+    background: #fff;
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .blog-form h2 {
+    margin-top: 0;
   }
   
   .form-group {
@@ -15,36 +19,35 @@
   
   label {
     margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #333;
+    font-weight: bold;
   }
   
-  input, textarea {
-    padding: 0.75rem;
+  input,
+  textarea {
+    padding: 0.8rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
-    transition: border-color 0.3s ease;
+  }
   
-    &:focus {
-      border-color: #007bff;
-      outline: none;
-    }
+  input:focus,
+  textarea:focus {
+    border-color: #007bff;
+    outline: none;
   }
   
   .btn-primary {
-    align-self: flex-start;
     background-color: #007bff;
     color: #fff;
     border: none;
-    padding: 0.75rem 1.5rem;
+    padding: 0.8rem 1.5rem;
     font-size: 1rem;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+  }
   
-    &:hover {
-      background-color: #0056b3;
-    }
+  .btn-primary:hover {
+    background-color: #0056b3;
   }
   

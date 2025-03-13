@@ -1,11 +1,37 @@
-<div class="blog-list">
-    <div *ngFor="let blog of blogs" class="blog-card">
-      <h3>{{ blog.title }}</h3>
-      <p class="content">{{ blog.content }}</p>
-      <p class="summary" *ngIf="blog.summary">📝 <strong>Zusammenfassung:</strong> {{ blog.summary }}</p>
-      <span class="status" [ngClass]="blog.approved ? 'approved' : 'pending'">
-        {{ blog.approved ? '✅ Freigegeben' : '⏳ In Prüfung' }}
-      </span>
+<div class="blog-list-container">
+
+    <!-- Refresh-Button -->
+    <div class="refresh-container">
+      <button class="refresh-button" (click)="loadBlogs()">🔄 Aktualisieren</button>
     </div>
+  
+    <!-- Spinner -->
+    <div *ngIf="loading" class="spinner-container">
+      <div class="spinner"></div>
+      <p>Blogs werden geladen...</p>
+    </div>
+  
+    <!-- Blog-Liste -->
+    <div *ngIf="!loading" class="blog-list">
+      <div *ngFor="let blog of blogs" class="blog-card">
+        
+        <div class="blog-header">
+          <h3 class="blog-title">{{ blog.title }}</h3>
+          <span class="status" [ngClass]="blog.approved ? 'approved' : 'pending'">
+            {{ blog.approved ? '✅ Freigegeben' : ' In Prüfung' }}
+          </span>
+        </div>
+  
+        <p class="blog-content">
+          {{ blog.content }}
+        </p>
+  
+        <div *ngIf="blog.summary" class="blog-summary">
+          <strong>Zusammenfassung:</strong>
+          <p>{{ blog.summary }}</p>
+        </div>
+      </div>
+    </div>
+  
   </div>
   
