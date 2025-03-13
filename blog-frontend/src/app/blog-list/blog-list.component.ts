@@ -4,11 +4,10 @@ import { Blog } from '../blog.model';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-blog-list',
-  standalone: true,
-  templateUrl: './blog-list.component.html',
-  styleUrls: ['./blog-list.component.scss'],
-  imports: [CommonModule]
+    selector: 'app-blog-list',
+    templateUrl: './blog-list.component.html',
+    styleUrls: ['./blog-list.component.scss'],
+    imports: [CommonModule]
 })
 export class BlogListComponent implements OnInit {
   blogs: Blog[] = [];

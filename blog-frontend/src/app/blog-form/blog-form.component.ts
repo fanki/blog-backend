@@ -3,11 +3,10 @@ import { BlogService } from '../blog.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-blog-form',
-  standalone: true,
-  templateUrl: './blog-form.component.html',
-  styleUrls: ['./blog-form.component.scss'],
-  imports: [FormsModule]
+    selector: 'app-blog-form',
+    templateUrl: './blog-form.component.html',
+    styleUrls: ['./blog-form.component.scss'],
+    imports: [FormsModule]
 })
 export class BlogFormComponent {
   title = '';
