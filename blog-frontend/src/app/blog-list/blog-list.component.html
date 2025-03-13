@@ -1,0 +1,54 @@
+<div class="blog-list-container">
+
+    <!-- Refresh-Button -->
+    <div class="refresh-container">
+      <button class="refresh-button" (click)="loadBlogs()">🔄 Aktualisieren</button>
+    </div>
+  
+    <!-- Spinner -->
+    <div *ngIf="loading" class="spinner-container">
+      <div class="spinner"></div>
+      <p>Blogs werden geladen...</p>
+    </div>
+  
+    <!-- Keine Blogs vorhanden -->
+    <div *ngIf="!loading && noBlogs" class="no-blogs-container">
+      <p>Keine Blogs vorhanden.</p>
+    </div>
+  
+    <!-- Blog-Liste -->
+    <div *ngIf="!loading && !noBlogs" class="blog-list">
+      <div *ngFor="let blog of blogs" class="blog-card">
+  
+        <div class="blog-header">
+            <h3 class="blog-title">{{ blog.title }}</h3>
+          
+            <span class="status"
+                  [ngClass]="{
+                    'approved': blog.approved === true,
+                    'pending': blog.approved === null || blog.approved === undefined,
+                    'rejected': blog.approved === false
+                  }">
+          
+              <!-- Bedingte Anzeige des Status-Texts -->
+              {{ blog.approved === true 
+                  ? '✅ Freigegeben' 
+                  : blog.approved === false 
+                    ? '❌ Abgelehnt' 
+                    : '🕒 In Prüfung' }}
+            </span>
+          </div>
+          
+  
+        <p class="blog-content">{{ blog.content }}</p>
+  
+        <div *ngIf="blog.summary" class="blog-summary">
+          <strong>Zusammenfassung:</strong>
+          <p>{{ blog.summary }}</p>
+        </div>
+  
+      </div>
+    </div>
+  
+  </div>
+  

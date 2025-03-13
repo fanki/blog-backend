@@ -1,0 +1,38 @@
+<form (submit)="createPost()" class="blog-form">
+
+    <h2>Neuen Blog erstellen</h2>
+  
+    <div class="form-group">
+      <label for="title">Titel</label>
+      <input
+        id="title"
+        [(ngModel)]="title"
+        name="title"
+        type="text"
+        class="form-control"
+        placeholder="Mindestens 5 Zeichen..."
+        required
+      />
+    </div>
+  
+    <div class="form-group">
+      <label for="content">Inhalt</label>
+      <textarea
+        id="content"
+        [(ngModel)]="content"
+        name="content"
+        rows="5"
+        class="form-control"
+        placeholder="Mindestens 10 Zeichen..."
+        required
+      ></textarea>
+    </div>
+  
+    <button type="submit" class="btn-primary">Erstellen</button>
+  
+    <!-- Toast -->
+    <div *ngIf="showToast" class="toast">
+      ✅ Blog erfolgreich erstellt!
+    </div>
+  </form>
+  
