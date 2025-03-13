@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   mysql-db:
     image: mysql:8
@@ -10,10 +12,10 @@ services:
       MYSQL_PASSWORD: blogpassword
     ports:
       - "3306:3306"
-    networks:
-      - blog-network
     volumes:
       - mysql-data:/var/lib/mysql
+    networks:
+      - blog-network
 
   redpanda-1:
     image: docker.redpanda.com/redpandadata/redpanda:v23.2.2
@@ -46,7 +48,6 @@ services:
       quarkus.datasource.username: bloguser
       quarkus.datasource.password: blogpassword
       kafka.bootstrap.servers: redpanda-1:9092
-      QUARKUS_LANGCHAIN4J_OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
       - mysql-db
       - redpanda-1
@@ -73,8 +74,8 @@ services:
     networks:
       - blog-network
 
-networks:
-  blog-network:
-
 volumes:
   mysql-data:
+
+networks:
+  blog-network:
