@@ -46,6 +46,9 @@ public class BlogResource {
     public Response createBlog(BlogEntry entry) {
         persistBlogEntry(entry);
         validationRequestEmitter.send(new ValidationRequest(entry.id, entry.title + " " + entry.content));
+        if (entry.summary != null && entry.summary.length() > 10000) {
+            LOGGER.warn("Summary ist zu lang!");
+        }        
         return Response.ok(entry).build();
     }
 

@@ -34,8 +34,8 @@
 
   <!-- Tags / Chips Eingabe -->
   <mat-form-field class="tags-input" appearance="fill">
-    <mat-chip-grid aria-label="Tag-Auswahl">
-
+    <mat-chip-grid #chipGrid aria-label="Tag-Auswahl">
+  
       <!-- Bestehende Tags als Rows -->
       <mat-chip-row
         *ngFor="let tag of selectedTags"
@@ -47,16 +47,31 @@
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-chip-row>
-
+  
       <!-- Input für neue Tags -->
       <input
-      placeholder="Neues Tag hinzufügen..."
-      matChipInput
-      (matChipInputAdd)="addTag($event)"
-    />
-
+        placeholder="Neues Tag hinzufügen..."
+        matInput
+        [matChipInputFor]="chipGrid"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        (matChipInputTokenEnd)="addTag($event)"
+      />
+  
     </mat-chip-grid>
   </mat-form-field>
+  
+
+  <!-- Vorschläge -->
+  <div *ngIf="suggestedTags.length > 0" class="suggested-tags">
+    <p>Vorgeschlagene Tags:</p>
+    <span
+      class="suggested-tag"
+      *ngFor="let tag of suggestedTags"
+      (click)="addSuggestedTag(tag)"
+    >
+      {{ tag }}
+    </span>
+  </div>
 
   <!-- Blog erstellen -->
   <button type="submit" class="btn-primary">Erstellen</button>

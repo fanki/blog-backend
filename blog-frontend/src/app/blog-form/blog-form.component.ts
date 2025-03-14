@@ -3,7 +3,8 @@ import { BlogService } from '../blog.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-import { MatChipsModule, MatChipInput, MatChipInputEvent } from '@angular/material/chips';
+// Angular Material
+import { MatChipsModule, MatChipInputEvent } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -19,7 +20,6 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
     CommonModule,
     FormsModule,
     MatChipsModule,
-    MatChipInput,
     MatIconModule,
     MatFormFieldModule,
     MatInputModule
@@ -81,18 +81,12 @@ export class BlogFormComponent {
   getSuggestedTags(): void {
     if (this.title.length < 3 && this.content.length < 5) {
       this.suggestedTags = [];
-      this.selectedTags = [];
       return;
     }
 
     this.blogService.suggestTags(this.title, this.content).subscribe({
       next: (tags) => {
         this.suggestedTags = tags;
-        tags.forEach(tag => {
-          if (!this.selectedTags.includes(tag)) {
-            this.selectedTags.push(tag);
-          }
-        });
         console.log('Vorgeschlagene Tags:', tags);
       },
       error: (error) => {
@@ -101,22 +95,26 @@ export class BlogFormComponent {
     });
   }
 
-  addTag(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-    const value = (inputElement.value || '').trim();
-  
+  addTag(event: MatChipInputEvent): void {
+    const value = (event.value || '').trim();
+
     if (value && !this.selectedTags.includes(value)) {
       this.selectedTags.push(value);
     }
-  
-    // Reset the input field
-    inputElement.value = '';
+
+    if (event.chipInput) {
+      event.chipInput.clear();
+    }
   }
-  
+
+  addSuggestedTag(tag: string): void {
+    if (!this.selectedTags.includes(tag)) {
+      this.selectedTags.push(tag);
+    }
+  }
 
   removeTag(tag: string): void {
     const index = this.selectedTags.indexOf(tag);
-
     if (index >= 0) {
       this.selectedTags.splice(index, 1);
     }
