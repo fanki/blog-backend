@@ -5,4 +5,5 @@ export interface Blog {
     summary: string;
     approved: boolean;
     tags: string[];
+    category: string;
   }

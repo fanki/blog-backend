@@ -3,8 +3,7 @@ import { BlogService } from '../blog.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-// Angular Material
-import { MatChipsModule, MatChipInputEvent } from '@angular/material/chips';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -29,10 +28,11 @@ export class BlogFormComponent {
 
   title = '';
   content = '';
+  category = '';                    // ➕ Kategorie
   suggestedTags: string[] = [];
   selectedTags: string[] = [];
-  showToast = false;
 
+  showToast = false;
   debounceTimer: any;
 
   separatorKeysCodes: number[] = [ENTER, COMMA];
@@ -55,7 +55,8 @@ export class BlogFormComponent {
     const newBlog = {
       title: this.title.trim(),
       content: this.content.trim(),
-      tags: this.selectedTags
+      tags: this.selectedTags,
+      category: this.category  // ➕ Kategorie mitsenden
     };
 
     this.blogService.createBlog(newBlog).subscribe({
@@ -74,37 +75,40 @@ export class BlogFormComponent {
   onInputChange(): void {
     clearTimeout(this.debounceTimer);
     this.debounceTimer = setTimeout(() => {
-      this.getSuggestedTags();
+      this.getSuggestions();
     }, 500);
   }
 
-  getSuggestedTags(): void {
+  getSuggestions(): void {
     if (this.title.length < 3 && this.content.length < 5) {
       this.suggestedTags = [];
+      this.selectedTags = [];
+      this.category = '';
       return;
     }
 
-    this.blogService.suggestTags(this.title, this.content).subscribe({
-      next: (tags) => {
-        this.suggestedTags = tags;
-        console.log('Vorgeschlagene Tags:', tags);
+    this.blogService.suggestTagsAndCategory(this.title, this.content).subscribe({
+      next: (result) => {
+        this.suggestedTags = result.tags;
+        this.category = result.category;
+        this.selectedTags = [...result.tags];
+        console.log('Vorschläge erhalten:', result);
       },
       error: (error) => {
-        console.error('Fehler beim Laden der Tags:', error);
+        console.error('Fehler beim Laden der Vorschläge:', error);
       }
     });
   }
 
-  addTag(event: MatChipInputEvent): void {
-    const value = (event.value || '').trim();
+  addTag(event: any): void {
+    const inputElement = event.target as HTMLInputElement;
+    const value = (inputElement.value || '').trim();
 
     if (value && !this.selectedTags.includes(value)) {
       this.selectedTags.push(value);
     }
 
-    if (event.chipInput) {
-      event.chipInput.clear();
-    }
+    inputElement.value = '';
   }
 
   addSuggestedTag(tag: string): void {
@@ -123,6 +127,7 @@ export class BlogFormComponent {
   private resetForm(): void {
     this.title = '';
     this.content = '';
+    this.category = '';
     this.suggestedTags = [];
     this.selectedTags = [];
   }

@@ -5,7 +5,7 @@
     <button class="refresh-button" (click)="loadBlogs()">🔄 Aktualisieren</button>
   </div>
 
-  <!-- Spinner -->
+  <!-- Spinner (Ladeanzeige) -->
   <div *ngIf="loading" class="spinner-container">
     <div class="spinner"></div>
     <p>Blogs werden geladen...</p>
@@ -13,13 +13,14 @@
 
   <!-- Keine Blogs vorhanden -->
   <div *ngIf="!loading && noBlogs" class="no-blogs-container">
-    <p>Keine Blogs vorhanden.</p>
+    <p>🚫 Keine Blogs vorhanden.</p>
   </div>
 
   <!-- Blog-Liste -->
   <div *ngIf="!loading && !noBlogs" class="blog-list">
     <div *ngFor="let blog of blogs" class="blog-card">
 
+      <!-- Header mit Titel und Status -->
       <div class="blog-header">
         <h3 class="blog-title">{{ blog.title }}</h3>
 
@@ -38,8 +39,15 @@
         </span>
       </div>
 
+      <!-- Kategorie -->
+      <div *ngIf="blog.category" class="blog-category">
+        <strong>Kategorie:</strong> {{ blog.category }}
+      </div>
+
+      <!-- Inhalt -->
       <p class="blog-content">{{ blog.content }}</p>
 
+      <!-- Tags -->
       <div *ngIf="!!blog.tags && blog.tags.length > 0" class="blog-tags">
         <strong>Tags:</strong>
         <div class="tag-container">
@@ -48,8 +56,8 @@
           </span>
         </div>
       </div>
-           
 
+      <!-- Zusammenfassung -->
       <div *ngIf="blog.summary" class="blog-summary">
         <strong>Zusammenfassung:</strong>
         <p>{{ blog.summary }}</p>

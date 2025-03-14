@@ -32,10 +32,23 @@
     ></textarea>
   </div>
 
+  <!-- Kategorie (Vorschlag) -->
+  <div class="form-group">
+    <label for="category">Kategorie</label>
+    <input
+      id="category"
+      [(ngModel)]="category"
+      name="category"
+      type="text"
+      class="form-control"
+      placeholder="Kategorie (wird vorgeschlagen)"
+    />
+  </div>
+
   <!-- Tags / Chips Eingabe -->
   <mat-form-field class="tags-input" appearance="fill">
     <mat-chip-grid #chipGrid aria-label="Tag-Auswahl">
-  
+
       <!-- Bestehende Tags als Rows -->
       <mat-chip-row
         *ngFor="let tag of selectedTags"
@@ -47,7 +60,7 @@
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-chip-row>
-  
+
       <!-- Input für neue Tags -->
       <input
         placeholder="Neues Tag hinzufügen..."
@@ -56,10 +69,9 @@
         [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
         (matChipInputTokenEnd)="addTag($event)"
       />
-  
+
     </mat-chip-grid>
   </mat-form-field>
-  
 
   <!-- Vorschläge -->
   <div *ngIf="suggestedTags.length > 0" class="suggested-tags">
