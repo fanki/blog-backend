@@ -11,12 +11,15 @@ import com.example.messaging.ValidationRequest;
 import com.example.messaging.ValidationResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.example.control.SummaryService;
 import com.example.control.TagSuggestionService;
+import com.example.control.CategorySuggestionService;
 
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
+
 import io.smallrye.common.annotation.Blocking;
 import org.jboss.logging.Logger;
 
@@ -40,15 +43,21 @@ public class BlogResource {
     TagSuggestionService tagSuggestionService;
 
     @Inject
+    CategorySuggestionService categorySuggestionService;
+
+    @Inject
     ObjectMapper mapper;
 
     @POST
     public Response createBlog(BlogEntry entry) {
         persistBlogEntry(entry);
+
         validationRequestEmitter.send(new ValidationRequest(entry.id, entry.title + " " + entry.content));
+
         if (entry.summary != null && entry.summary.length() > 10000) {
             LOGGER.warn("Summary ist zu lang!");
-        }        
+        }
+
         return Response.ok(entry).build();
     }
 
@@ -68,6 +77,13 @@ public class BlogResource {
             entry.tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {});
         } catch (Exception e) {
             LOGGER.error("Fehler bei der Tag-Generierung", e);
+        }
+
+        try {
+            String category = categorySuggestionService.suggestCategory(entry.title + " " + entry.content);
+            entry.category = category;
+        } catch (Exception e) {
+            LOGGER.error("Fehler bei der Kategorie-Zuordnung", e);
         }
 
         entry.persist();
@@ -105,5 +121,26 @@ public class BlogResource {
         }
     }
 
+    @POST
+    @Path("/suggest-tags-categories")
+    public Response suggestTagsAndCategory(TagSuggestionRequest request) {
+        try {
+            String blogText = request.title() + " " + request.content();
+
+            String tagsJson = tagSuggestionService.suggestTags(blogText);
+            List<String> tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {});
+
+            String category = categorySuggestionService.suggestCategory(blogText);
+
+            return Response.ok(new TagCategorySuggestionResponse(tags, category)).build();
+        } catch (Exception e) {
+            LOGGER.error("Fehler bei der Vorschlags-Generierung", e);
+            return Response.serverError().entity("Fehler bei der Vorschlags-Generierung").build();
+        }
+    }
+
+    // DTOs für Requests & Responses
     public record TagSuggestionRequest(String title, String content) {}
+
+    public record TagCategorySuggestionResponse(List<String> tags, String category) {}
 }

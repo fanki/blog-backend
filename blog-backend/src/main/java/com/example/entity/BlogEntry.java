@@ -23,4 +23,7 @@ public class BlogEntry extends PanacheEntity {
     @Column(name = "tag")
     public List<String> tags;
 
+    @Column(length = 255)
+    public String category;
+
 }
