@@ -1,38 +1,69 @@
-<form (submit)="createPost()" class="blog-form">
+<form (ngSubmit)="createPost()" class="blog-form">
 
-    <h2>Neuen Blog erstellen</h2>
-  
-    <div class="form-group">
-      <label for="title">Titel</label>
+  <h2>Neuen Blog erstellen</h2>
+
+  <!-- Titel -->
+  <div class="form-group">
+    <label for="title">Titel</label>
+    <input
+      id="title"
+      [(ngModel)]="title"
+      name="title"
+      type="text"
+      class="form-control"
+      placeholder="Mindestens 5 Zeichen..."
+      (input)="onInputChange()"
+      required
+    />
+  </div>
+
+  <!-- Inhalt -->
+  <div class="form-group">
+    <label for="content">Inhalt</label>
+    <textarea
+      id="content"
+      [(ngModel)]="content"
+      name="content"
+      rows="5"
+      class="form-control"
+      placeholder="Mindestens 10 Zeichen..."
+      (input)="onInputChange()"
+      required
+    ></textarea>
+  </div>
+
+  <!-- Tags / Chips Eingabe -->
+  <mat-form-field class="tags-input" appearance="fill">
+    <mat-chip-grid aria-label="Tag-Auswahl">
+
+      <!-- Bestehende Tags als Rows -->
+      <mat-chip-row
+        *ngFor="let tag of selectedTags"
+        [removable]="true"
+        (removed)="removeTag(tag)"
+      >
+        {{ tag }}
+        <button matChipRemove>
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip-row>
+
+      <!-- Input für neue Tags -->
       <input
-        id="title"
-        [(ngModel)]="title"
-        name="title"
-        type="text"
-        class="form-control"
-        placeholder="Mindestens 5 Zeichen..."
-        required
-      />
-    </div>
-  
-    <div class="form-group">
-      <label for="content">Inhalt</label>
-      <textarea
-        id="content"
-        [(ngModel)]="content"
-        name="content"
-        rows="5"
-        class="form-control"
-        placeholder="Mindestens 10 Zeichen..."
-        required
-      ></textarea>
-    </div>
-  
-    <button type="submit" class="btn-primary">Erstellen</button>
-  
-    <!-- Toast -->
-    <div *ngIf="showToast" class="toast">
-      ✅ Blog erfolgreich erstellt!
-    </div>
-  </form>
-  
+      placeholder="Neues Tag hinzufügen..."
+      matChipInput
+      (matChipInputAdd)="addTag($event)"
+    />
+
+    </mat-chip-grid>
+  </mat-form-field>
+
+  <!-- Blog erstellen -->
+  <button type="submit" class="btn-primary">Erstellen</button>
+
+  <!-- Toast -->
+  <div *ngIf="showToast" class="toast">
+    ✅ Blog erfolgreich erstellt!
+  </div>
+
+</form>

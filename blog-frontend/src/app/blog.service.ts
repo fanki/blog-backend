@@ -19,4 +19,9 @@ export class BlogService {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.post<Blog>(this.apiUrl, blog, { headers });
   }
+
+  suggestTags(title: string, content: string): Observable<string[]> {
+    const payload = { title, content };
+    return this.http.post<string[]>(`${this.apiUrl}/suggest-tags`, payload);
+  }
 }

@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { BlogFormComponent } from './blog-form/blog-form.component';
 import { BlogListComponent } from './blog-list/blog-list.component';
+
 
 @Component({
     selector: 'app-root',
@@ -10,7 +11,10 @@ import { BlogListComponent } from './blog-list/blog-list.component';
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  blogList!: BlogListComponent; // Referenz auf BlogListComponent
+  //blogList!: BlogListComponent; // Referenz auf BlogListComponent
+
+  @ViewChild('blogList') blogList!: BlogListComponent;
+
 
   onPostCreated(): void {
     // Hier triggern wir die Aktualisierung der Liste
