@@ -4,14 +4,19 @@
   </header>
 
   <main class="main-content">
-    <!-- Blog-Formular -->
     <section class="form-section">
-      <app-blog-form></app-blog-form>
+      <app-blog-form
+        [blogToEdit]="selectedBlog"
+        (postCreated)="onPostCreated()"
+        (editCanceled)="onEditCanceled()">
+      </app-blog-form>
     </section>
 
-    <!-- Blog-Liste -->
     <section class="list-section">
-      <app-blog-list #blogList></app-blog-list>
+      <app-blog-list
+        #blogList
+        (editBlog)="onEditBlog($event)">
+      </app-blog-list>
     </section>
   </main>
 

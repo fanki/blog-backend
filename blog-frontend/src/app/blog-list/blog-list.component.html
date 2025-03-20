@@ -1,66 +1,55 @@
 <div class="blog-list-container">
 
-  <!-- Refresh-Button -->
   <div class="refresh-container">
-    <button class="refresh-button" (click)="loadBlogs()">🔄 Aktualisieren</button>
+    <button class="btn-primary" (click)="loadBlogs()">🔄 Aktualisieren</button>
   </div>
 
-  <!-- Spinner (Ladeanzeige) -->
   <div *ngIf="loading" class="spinner-container">
     <div class="spinner"></div>
     <p>Blogs werden geladen...</p>
   </div>
 
-  <!-- Keine Blogs vorhanden -->
   <div *ngIf="!loading && noBlogs" class="no-blogs-container">
     <p>🚫 Keine Blogs vorhanden.</p>
   </div>
 
-  <!-- Blog-Liste -->
   <div *ngIf="!loading && !noBlogs" class="blog-list">
     <div *ngFor="let blog of blogs" class="blog-card">
 
-      <!-- Header mit Titel und Status -->
       <div class="blog-header">
         <h3 class="blog-title">{{ blog.title }}</h3>
 
         <span class="status"
-              [ngClass]="{
-                'approved': blog.approved === true,
-                'pending': blog.approved === null || blog.approved === undefined,
-                'rejected': blog.approved === false
-              }">
-
-          {{ blog.approved === true 
-              ? '✅ Freigegeben' 
-              : blog.approved === false 
-                ? '❌ Abgelehnt' 
-                : '🕒 In Prüfung' }}
+          [ngClass]="{
+            'approved': blog.approved === true,
+            'pending': blog.approved === null || blog.approved === undefined,
+            'rejected': blog.approved === false
+          }">
+          {{ blog.approved === true ? '✅ Freigegeben' : blog.approved === false ? '❌ Abgelehnt' : '🕒 In Prüfung' }}
         </span>
       </div>
 
-      <!-- Kategorie -->
       <div *ngIf="blog.category" class="blog-category">
         <strong>Kategorie:</strong> {{ blog.category }}
       </div>
 
-      <!-- Inhalt -->
       <p class="blog-content">{{ blog.content }}</p>
 
-      <!-- Tags -->
       <div *ngIf="!!blog.tags && blog.tags.length > 0" class="blog-tags">
         <strong>Tags:</strong>
         <div class="tag-container">
-          <span class="tag" *ngFor="let tag of blog.tags">
-            {{ tag }}
-          </span>
+          <span class="tag" *ngFor="let tag of blog.tags">{{ tag }}</span>
         </div>
       </div>
 
-      <!-- Zusammenfassung -->
       <div *ngIf="blog.summary" class="blog-summary">
         <strong>Zusammenfassung:</strong>
         <p>{{ blog.summary }}</p>
+      </div>
+
+      <div class="blog-actions">
+        <button class="btn-edit" (click)="editBlogAction(blog)">✏️ Bearbeiten</button>
+        <button class="btn-delete" (click)="deleteBlog(blog)">🗑️ Löschen</button>
       </div>
 
     </div>

@@ -1,6 +1,7 @@
-<form (ngSubmit)="createPost()" class="blog-form">
+<form (ngSubmit)="editMode ? updatePost() : createPost()" class="blog-form">
 
-  <h2>Neuen Blog erstellen</h2>
+  <h2 *ngIf="!editMode">Neuen Blog erstellen</h2>
+  <h2 *ngIf="editMode">Blog bearbeiten</h2>
 
   <!-- Titel -->
   <div class="form-group">
@@ -32,7 +33,7 @@
     ></textarea>
   </div>
 
-  <!-- Kategorie (Vorschlag) -->
+  <!-- Kategorie -->
   <div class="form-group">
     <label for="category">Kategorie</label>
     <input
@@ -45,23 +46,19 @@
     />
   </div>
 
-  <!-- Tags / Chips Eingabe -->
+  <!-- Tags -->
   <mat-form-field class="tags-input" appearance="fill">
     <mat-chip-grid #chipGrid aria-label="Tag-Auswahl">
-
-      <!-- Bestehende Tags als Rows -->
       <mat-chip-row
         *ngFor="let tag of selectedTags"
         [removable]="true"
-        (removed)="removeTag(tag)"
-      >
+        (removed)="removeTag(tag)">
         {{ tag }}
         <button matChipRemove>
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-chip-row>
 
-      <!-- Input für neue Tags -->
       <input
         placeholder="Neues Tag hinzufügen..."
         matInput
@@ -69,7 +66,6 @@
         [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
         (matChipInputTokenEnd)="addTag($event)"
       />
-
     </mat-chip-grid>
   </mat-form-field>
 
@@ -79,18 +75,23 @@
     <span
       class="suggested-tag"
       *ngFor="let tag of suggestedTags"
-      (click)="addSuggestedTag(tag)"
-    >
+      (click)="addSuggestedTag(tag)">
       {{ tag }}
     </span>
   </div>
 
-  <!-- Blog erstellen -->
-  <button type="submit" class="btn-primary">Erstellen</button>
+  <!-- Action Buttons -->
+  <div class="button-row">
+    <button type="submit" class="btn-primary">
+      {{ editMode ? 'Speichern' : 'Erstellen' }}
+    </button>
+    <button type="button" class="btn-secondary" (click)="resetForm()">Zurücksetzen</button>
+    <button *ngIf="editMode" type="button" class="btn-cancel" (click)="cancelEdit()">Abbrechen</button>
+  </div>
 
   <!-- Toast -->
   <div *ngIf="showToast" class="toast">
-    ✅ Blog erfolgreich erstellt!
+    {{ toastMessage }}
   </div>
 
 </form>

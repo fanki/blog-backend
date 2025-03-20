@@ -74,7 +74,8 @@ public class BlogResource {
 
         try {
             String tagsJson = tagSuggestionService.suggestTags(entry.title + " " + entry.content);
-            entry.tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {});
+            entry.tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {
+            });
         } catch (Exception e) {
             LOGGER.error("Fehler bei der Tag-Generierung", e);
         }
@@ -113,7 +114,8 @@ public class BlogResource {
         try {
             String blogText = request.title() + " " + request.content();
             String tagsJson = tagSuggestionService.suggestTags(blogText);
-            List<String> tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {});
+            List<String> tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {
+            });
             return Response.ok(tags).build();
         } catch (Exception e) {
             LOGGER.error("Fehler bei der Tag-Generierung", e);
@@ -128,7 +130,8 @@ public class BlogResource {
             String blogText = request.title() + " " + request.content();
 
             String tagsJson = tagSuggestionService.suggestTags(blogText);
-            List<String> tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {});
+            List<String> tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {
+            });
 
             String category = categorySuggestionService.suggestCategory(blogText);
 
@@ -139,8 +142,42 @@ public class BlogResource {
         }
     }
 
-    // DTOs für Requests & Responses
-    public record TagSuggestionRequest(String title, String content) {}
+    @PUT
+    @Path("/{id}")
+    @Transactional
+    public Response updateBlog(@PathParam("id") Long id, BlogEntry updatedEntry) {
+        BlogEntry existingEntry = BlogEntry.findById(id);
+        if (existingEntry == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
 
-    public record TagCategorySuggestionResponse(List<String> tags, String category) {}
+        existingEntry.title = updatedEntry.title;
+        existingEntry.content = updatedEntry.content;
+        existingEntry.category = updatedEntry.category;
+        existingEntry.tags = updatedEntry.tags;
+        existingEntry.summary = updatedEntry.summary;
+
+        existingEntry.persist();
+        return Response.ok(existingEntry).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Transactional
+    public Response deleteBlog(@PathParam("id") Long id) {
+        BlogEntry entry = BlogEntry.findById(id);
+        if (entry == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        entry.delete();
+        return Response.noContent().build();
+    }
+
+    // DTOs für Requests & Responses
+    public record TagSuggestionRequest(String title, String content) {
+    }
+
+    public record TagCategorySuggestionResponse(List<String> tags, String category) {
+    }
 }

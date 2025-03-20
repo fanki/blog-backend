@@ -36,6 +36,11 @@ textarea:focus {
   outline: none;
 }
 
+.button-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .btn-primary {
   background-color: #007bff;
   color: #fff;
@@ -49,6 +54,34 @@ textarea:focus {
 
 .btn-primary:hover {
   background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-cancel {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  background-color: #c82333;
 }
 
 .toast {
@@ -73,6 +106,24 @@ textarea:focus {
 
 mat-chip {
   margin: 4px;
+}
+
+.suggested-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.suggested-tag {
+  background-color: #e0e0e0;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.suggested-tag:hover {
+  background-color: #d6d6d6;
 }
 
 @keyframes fadeInOut {

@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input, SimpleChanges } from '@angular/core';
 import { BlogService } from '../blog.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -9,6 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { Blog } from '../blog.model';
+
 
 @Component({
   selector: 'app-blog-form',
@@ -26,44 +28,45 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
 })
 export class BlogFormComponent {
 
+  @Output() postCreated = new EventEmitter<void>();
+  @Output() editCanceled = new EventEmitter<void>();
+  @Input() blogToEdit?: Blog;
+
+  // Form Felder
   title = '';
   content = '';
-  category = '';                    // ➕ Kategorie
-  suggestedTags: string[] = [];
+  category = '';
   selectedTags: string[] = [];
 
+  // Vorschläge
+  suggestedTags: string[] = [];
+
+  // UI State
+  editMode = false;
+  editingBlogId: number | null = null; // 🔧 ID speichern für updatePost()
+
   showToast = false;
+  toastMessage = '';
   debounceTimer: any;
-
   separatorKeysCodes: number[] = [ENTER, COMMA];
-
-  @Output() postCreated = new EventEmitter<void>();
 
   constructor(private blogService: BlogService) {}
 
   createPost(): void {
-    if (this.title.trim().length < 5) {
-      alert('Der Titel muss mindestens 5 Zeichen enthalten!');
-      return;
-    }
-
-    if (this.content.trim().length < 10) {
-      alert('Der Inhalt muss mindestens 10 Zeichen enthalten!');
-      return;
-    }
+    if (this.isInvalid()) return;
 
     const newBlog = {
       title: this.title.trim(),
       content: this.content.trim(),
       tags: this.selectedTags,
-      category: this.category  // ➕ Kategorie mitsenden
+      category: this.category
     };
 
     this.blogService.createBlog(newBlog).subscribe({
       next: () => {
         this.resetForm();
         this.postCreated.emit();
-        this.showSuccessToast();
+        this.showSuccessToast('✅ Blog wurde erstellt!');
       },
       error: (err) => {
         console.error('Fehler beim Erstellen des Blogs:', err);
@@ -72,11 +75,42 @@ export class BlogFormComponent {
     });
   }
 
+  updatePost(): void {
+    if (this.isInvalid()) return;
+    if (this.editingBlogId === null) {
+      alert('Kein Blog zum Bearbeiten ausgewählt!');
+      return;
+    }
+
+    const updatedBlog = {
+      id: this.editingBlogId,
+      title: this.title.trim(),
+      content: this.content.trim(),
+      category: this.category,
+      tags: this.selectedTags
+    };
+
+    this.blogService.updateBlog(updatedBlog.id, updatedBlog).subscribe({
+      next: () => {
+        this.resetForm();
+        this.postCreated.emit();
+        this.showSuccessToast('✅ Blog wurde aktualisiert!');
+      },
+      error: (err) => {
+        console.error('Fehler beim Aktualisieren:', err);
+        alert('Fehler beim Aktualisieren');
+      }
+    });
+  }
+
+  cancelEdit(): void {
+    this.resetForm();
+    this.editCanceled.emit();
+  }
+
   onInputChange(): void {
     clearTimeout(this.debounceTimer);
-    this.debounceTimer = setTimeout(() => {
-      this.getSuggestions();
-    }, 500);
+    this.debounceTimer = setTimeout(() => this.getSuggestions(), 500);
   }
 
   getSuggestions(): void {
@@ -91,8 +125,6 @@ export class BlogFormComponent {
       next: (result) => {
         this.suggestedTags = result.tags;
         this.category = result.category;
-        this.selectedTags = [...result.tags];
-        console.log('Vorschläge erhalten:', result);
       },
       error: (error) => {
         console.error('Fehler beim Laden der Vorschläge:', error);
@@ -124,18 +156,49 @@ export class BlogFormComponent {
     }
   }
 
-  private resetForm(): void {
+  public resetForm(): void {
     this.title = '';
     this.content = '';
     this.category = '';
-    this.suggestedTags = [];
     this.selectedTags = [];
+    this.suggestedTags = [];
+    this.editMode = false;
+    this.editingBlogId = null;
   }
 
-  private showSuccessToast(): void {
-    this.showToast = true;
-    setTimeout(() => {
-      this.showToast = false;
-    }, 3000);
+  private isInvalid(): boolean {
+    if (this.title.trim().length < 5) {
+      alert('Der Titel muss mindestens 5 Zeichen enthalten!');
+      return true;
+    }
+
+    if (this.content.trim().length < 10) {
+      alert('Der Inhalt muss mindestens 10 Zeichen enthalten!');
+      return true;
+    }
+
+    return false;
   }
+
+  private showSuccessToast(message: string): void {
+    this.toastMessage = message;
+    this.showToast = true;
+    setTimeout(() => this.showToast = false, 3000);
+  }
+
+  public loadBlogForEditing(blog: Blog): void {
+    this.editMode = true;
+    this.editingBlogId = blog.id; 
+    this.title = blog.title;
+    this.content = blog.content;
+    this.category = blog.category;
+    this.selectedTags = [...blog.tags];
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['blogToEdit'] && this.blogToEdit) {
+      this.loadBlogForEditing(this.blogToEdit);
+    }
+  }
+
 }

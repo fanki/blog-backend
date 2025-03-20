@@ -28,7 +28,22 @@ export class BlogService {
   }
 
   /**
-   * Nur Tags vorschlagen (Optional, wenn noch gebraucht)
+   * Blog-Eintrag bearbeiten / aktualisieren
+   */
+  updateBlog(blogId: number, blog: Partial<Blog>): Observable<Blog> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.put<Blog>(`${this.apiUrl}/${blogId}`, blog, { headers });
+  }
+
+  /**
+   * Blog-Eintrag löschen
+   */
+  deleteBlog(blogId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${blogId}`);
+  }
+
+  /**
+   * Nur Tags vorschlagen (Optional)
    */
   suggestTags(title: string, content: string): Observable<string[]> {
     const payload = { title, content };
