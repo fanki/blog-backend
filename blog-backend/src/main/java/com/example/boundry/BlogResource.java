@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.control.SummaryService;
 import com.example.control.TagSuggestionService;
 import com.example.control.CategorySuggestionService;
+import com.example.control.ModerationService;
 
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
@@ -48,6 +49,9 @@ public class BlogResource {
     @Inject
     ObjectMapper mapper;
 
+    @Inject
+    ModerationService moderationService;
+
     @POST
     public Response createBlog(BlogEntry entry) {
         persistBlogEntry(entry);
@@ -63,28 +67,42 @@ public class BlogResource {
 
     @Transactional
     void persistBlogEntry(BlogEntry entry) {
-        entry.approved = false;
+        entry.approved = false; // Standard: blockiert
 
+        // 1. Zusammenfassung erzeugen
         try {
             entry.summary = summaryService.summarize(entry.title + " " + entry.content);
         } catch (Exception e) {
-            LOGGER.warn("Fehler bei der Zusammenfassung", e);
-            entry.summary = "Zusammenfassung konnte nicht erstellt werden.";
+            LOGGER.warn("Fehler bei Zusammenfassung", e);
         }
 
+        // 2. Tags & Kategorien vorschlagen
         try {
             String tagsJson = tagSuggestionService.suggestTags(entry.title + " " + entry.content);
             entry.tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {
             });
         } catch (Exception e) {
-            LOGGER.error("Fehler bei der Tag-Generierung", e);
+            LOGGER.error("Fehler bei Tag-Generierung", e);
         }
 
         try {
             String category = categorySuggestionService.suggestCategory(entry.title + " " + entry.content);
             entry.category = category;
         } catch (Exception e) {
-            LOGGER.error("Fehler bei der Kategorie-Zuordnung", e);
+            LOGGER.error("Fehler bei Kategorie-Zuordnung", e);
+        }
+
+        // 3. Moderation prüfen
+        try {
+            String moderationResult = moderationService.moderate(entry.title + " " + entry.content);
+            LOGGER.infof("Moderationsergebnis: %s", moderationResult);
+            if ("SAFE".equalsIgnoreCase(moderationResult.trim())) {
+                entry.approved = true;
+            } else {
+                LOGGER.warn("Blog-Post enthält problematische Inhalte. Muss manuell geprüft werden.");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Fehler bei der Moderation", e);
         }
 
         entry.persist();
@@ -172,6 +190,47 @@ public class BlogResource {
 
         entry.delete();
         return Response.noContent().build();
+    }
+
+    @PUT
+    @Path("/approve/{id}")
+    @Transactional
+    public Response approveBlog(@PathParam("id") Long id) {
+        BlogEntry entry = BlogEntry.findById(id);
+        if (entry == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        entry.approved = true;
+        entry.persist();
+        return Response.ok(entry).build();
+    }
+
+    @GET
+    @Path("/pending")
+    public List<BlogEntry> listPending() {
+        return BlogEntry.list("approved", false);
+    }
+
+    @POST
+    @Path("/moderate")
+    public Response moderateContent(TagSuggestionRequest request) {
+        try {
+            String blogText = request.title() + " " + request.content();
+            String moderationResult = moderationService.moderate(blogText);
+
+            LOGGER.info("Moderationsergebnis: " + moderationResult);
+
+            boolean safe = "SAFE".equalsIgnoreCase(moderationResult.trim());
+
+            return Response.ok(new ModerationResponse(safe)).build();
+        } catch (Exception e) {
+            LOGGER.error("Fehler bei der Moderation", e);
+            return Response.serverError().entity("Fehler bei der Moderation").build();
+        }
+    }
+
+    // DTO
+    public record ModerationResponse(boolean safe) {
     }
 
     // DTOs für Requests & Responses
