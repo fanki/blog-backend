@@ -1,6 +1,39 @@
 <div class="blog-list-container">
 
-  <div class="refresh-container">
+  <!-- Filter-Leiste -->
+  <div class="search-filters">
+
+    <!-- Titel-Suche -->
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Suche nach Titel</mat-label>
+      <input matInput [(ngModel)]="searchTitle" (input)="filterBlogs()" placeholder="Blog-Titel...">
+    </mat-form-field>
+
+    <!-- Tags Filter -->
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Tags</mat-label>
+      <mat-select [(ngModel)]="selectedTag" (selectionChange)="filterBlogs()">
+        <mat-option *ngFor="let tag of allTags" [value]="tag">
+          {{ tag }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Kategorien Filter -->
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Kategorie</mat-label>
+      <mat-select [(ngModel)]="selectedCategory" (selectionChange)="filterBlogs()">
+        <mat-option *ngFor="let category of allCategories" [value]="category">
+          {{ category }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Reset Button -->
+    <button class="reset-button" (click)="resetFilters()">Reset Filter</button>
+
+
+    <!-- Aktualisieren Button -->
     <button class="btn-primary" (click)="loadBlogs()">🔄 Aktualisieren</button>
   </div>
 
@@ -14,7 +47,7 @@
   </div>
 
   <div *ngIf="!loading && !noBlogs" class="blog-list">
-    <div *ngFor="let blog of blogs" class="blog-card">
+    <div *ngFor="let blog of filteredBlogs" class="blog-card">
 
       <div class="blog-header">
         <h3 class="blog-title">{{ blog.title }}</h3>
