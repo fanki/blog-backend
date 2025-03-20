@@ -11,6 +11,10 @@ import { MatInputModule } from '@angular/material/input';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Blog } from '../blog.model';
 
+import { MatDialog } from '@angular/material/dialog';
+import { ModerationDialogComponent } from './moderation-dialog.component';
+
+
 
 @Component({
   selector: 'app-blog-form',
@@ -50,27 +54,52 @@ export class BlogFormComponent {
   debounceTimer: any;
   separatorKeysCodes: number[] = [ENTER, COMMA];
 
-  constructor(private blogService: BlogService) {}
+  constructor(
+    private blogService: BlogService,
+    private dialog: MatDialog
+  ) {}
 
   createPost(): void {
     if (this.isInvalid()) return;
-
-    const newBlog = {
-      title: this.title.trim(),
-      content: this.content.trim(),
-      tags: this.selectedTags,
-      category: this.category
-    };
-
-    this.blogService.createBlog(newBlog).subscribe({
-      next: () => {
-        this.resetForm();
-        this.postCreated.emit();
-        this.showSuccessToast('✅ Blog wurde erstellt!');
+  
+    const blogText = `${this.title.trim()} ${this.content.trim()}`;
+  
+    // 1️⃣ Moderation prüfen BEVOR Blog gespeichert wird!
+    this.blogService.moderateBlog(this.title, this.content).subscribe({
+      next: (moderationResult) => {
+        if (!moderationResult.safe) {
+          // 2️⃣ UNSAFE → Zeige Popup & brich ab!
+          this.dialog.open(ModerationDialogComponent);
+          return;   // Blog NICHT speichern!
+        }
+  
+        // 3️⃣ SAFE → Speichern!
+        const newBlog = {
+          title: this.title.trim(),
+          content: this.content.trim(),
+          tags: this.selectedTags,
+          category: this.category
+        };
+  
+        this.blogService.createBlog(newBlog).subscribe({
+          next: () => {
+            this.resetForm();
+            this.postCreated.emit();
+            this.showSuccessToast('✅ Blog wurde erstellt!');
+          },
+          error: (err) => {
+            console.error('Fehler beim Erstellen des Blogs:', err);
+            this.dialog.open(ModerationDialogComponent, {
+              data: { message: 'Fehler beim Erstellen des Blogs' }
+            });
+          }
+        });
       },
-      error: (err) => {
-        console.error('Fehler beim Erstellen des Blogs:', err);
-        alert('Fehler beim Erstellen des Blogs');
+      error: (err: any) => {
+        console.error('Fehler bei der Moderation:', err);
+        this.dialog.open(ModerationDialogComponent, {
+          data: { message: 'Fehler bei der Moderation' }
+        });
       }
     });
   }

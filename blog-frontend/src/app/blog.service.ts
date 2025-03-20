@@ -57,4 +57,11 @@ export class BlogService {
     const payload = { title, content };
     return this.http.post<{ tags: string[], category: string }>(`${this.apiUrl}/suggest-tags-categories`, payload);
   }
+
+  moderateBlog(title: string, content: string): Observable<{ safe: boolean }> {
+    const payload = { title, content };
+    return this.http.post<{ safe: boolean }>(`${this.apiUrl}/moderate`, payload);
+  }
+  
+  
 }
