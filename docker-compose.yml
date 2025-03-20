@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 services:
   mysql-db:
@@ -16,6 +16,11 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - blog-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redpanda-1:
     image: docker.redpanda.com/redpandadata/redpanda:v23.2.2
@@ -49,8 +54,10 @@ services:
       quarkus.datasource.password: blogpassword
       kafka.bootstrap.servers: redpanda-1:9092
     depends_on:
-      - mysql-db
-      - redpanda-1
+      mysql-db:
+        condition: service_healthy
+      redpanda-1:
+        condition: service_started
     networks:
       - blog-network
 

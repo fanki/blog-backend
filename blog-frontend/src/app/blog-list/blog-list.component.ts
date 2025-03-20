@@ -1,20 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { BlogService } from '../blog.service';
 import { Blog } from '../blog.model';
 import { CommonModule } from '@angular/common';
-import { BlogFormComponent } from '../blog-form/blog-form.component'; // WICHTIG!
 
 @Component({
   selector: 'app-blog-list',
   standalone: true,
   templateUrl: './blog-list.component.html',
   styleUrls: ['./blog-list.component.scss'],
-  imports: [CommonModule, BlogFormComponent], // Das Form einbinden!
+  imports: [CommonModule]
 })
 export class BlogListComponent implements OnInit {
+
   blogs: Blog[] = [];
   loading = false;
   noBlogs = false;
+
+  @Output() editBlog = new EventEmitter<Blog>();
 
   constructor(private blogService: BlogService) {}
 
@@ -24,13 +26,11 @@ export class BlogListComponent implements OnInit {
 
   loadBlogs(): void {
     this.loading = true;
-    this.noBlogs = false;
-
     this.blogService.getAllBlogs().subscribe({
-      next: (data) => {
+      next: (data: Blog[]) => {
         this.blogs = data.map((blog) => ({
           ...blog,
-          approved: [true, 1, '0x01'].includes(blog.approved),
+          approved: [true, 1, '0x01'].includes(blog.approved)
         }));
         this.noBlogs = this.blogs.length === 0;
       },
@@ -40,12 +40,34 @@ export class BlogListComponent implements OnInit {
       },
       complete: () => {
         this.loading = false;
-      },
+      }
     });
   }
 
   onPostCreated(): void {
-    console.log('Blog wurde erstellt. Lade Blogs neu...');
+    console.log('Ein Blog wurde erstellt oder aktualisiert');
     this.loadBlogs();
+  }
+
+  onEditCanceled(): void {
+    console.log('Bearbeiten wurde abgebrochen');
+  }
+
+  editBlogAction(blog: Blog): void {
+    this.editBlog.emit(blog);
+  }
+
+  deleteBlog(blog: Blog): void {
+    if (!confirm(`Möchtest du den Blog "${blog.title}" wirklich löschen?`)) return;
+
+    this.blogService.deleteBlog(blog.id).subscribe({
+      next: () => {
+        console.log('Blog gelöscht:', blog.title);
+        this.loadBlogs();
+      },
+      error: (err) => {
+        console.error('Fehler beim Löschen:', err);
+      }
+    });
   }
 }

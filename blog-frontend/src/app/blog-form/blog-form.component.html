@@ -1,38 +1,97 @@
-<form (submit)="createPost()" class="blog-form">
+<form (ngSubmit)="editMode ? updatePost() : createPost()" class="blog-form">
 
-    <h2>Neuen Blog erstellen</h2>
-  
-    <div class="form-group">
-      <label for="title">Titel</label>
+  <h2 *ngIf="!editMode">Neuen Blog erstellen</h2>
+  <h2 *ngIf="editMode">Blog bearbeiten</h2>
+
+  <!-- Titel -->
+  <div class="form-group">
+    <label for="title">Titel</label>
+    <input
+      id="title"
+      [(ngModel)]="title"
+      name="title"
+      type="text"
+      class="form-control"
+      placeholder="Mindestens 5 Zeichen..."
+      (input)="onInputChange()"
+      required
+    />
+  </div>
+
+  <!-- Inhalt -->
+  <div class="form-group">
+    <label for="content">Inhalt</label>
+    <textarea
+      id="content"
+      [(ngModel)]="content"
+      name="content"
+      rows="5"
+      class="form-control"
+      placeholder="Mindestens 10 Zeichen..."
+      (input)="onInputChange()"
+      required
+    ></textarea>
+  </div>
+
+  <!-- Kategorie -->
+  <div class="form-group">
+    <label for="category">Kategorie</label>
+    <input
+      id="category"
+      [(ngModel)]="category"
+      name="category"
+      type="text"
+      class="form-control"
+      placeholder="Kategorie (wird vorgeschlagen)"
+    />
+  </div>
+
+  <!-- Tags -->
+  <mat-form-field class="tags-input" appearance="fill">
+    <mat-chip-grid #chipGrid aria-label="Tag-Auswahl">
+      <mat-chip-row
+        *ngFor="let tag of selectedTags"
+        [removable]="true"
+        (removed)="removeTag(tag)">
+        {{ tag }}
+        <button matChipRemove>
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip-row>
+
       <input
-        id="title"
-        [(ngModel)]="title"
-        name="title"
-        type="text"
-        class="form-control"
-        placeholder="Mindestens 5 Zeichen..."
-        required
+        placeholder="Neues Tag hinzufügen..."
+        matInput
+        [matChipInputFor]="chipGrid"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        (matChipInputTokenEnd)="addTag($event)"
       />
-    </div>
-  
-    <div class="form-group">
-      <label for="content">Inhalt</label>
-      <textarea
-        id="content"
-        [(ngModel)]="content"
-        name="content"
-        rows="5"
-        class="form-control"
-        placeholder="Mindestens 10 Zeichen..."
-        required
-      ></textarea>
-    </div>
-  
-    <button type="submit" class="btn-primary">Erstellen</button>
-  
-    <!-- Toast -->
-    <div *ngIf="showToast" class="toast">
-      ✅ Blog erfolgreich erstellt!
-    </div>
-  </form>
-  
+    </mat-chip-grid>
+  </mat-form-field>
+
+  <!-- Vorschläge -->
+  <div *ngIf="suggestedTags.length > 0" class="suggested-tags">
+    <p>Vorgeschlagene Tags:</p>
+    <span
+      class="suggested-tag"
+      *ngFor="let tag of suggestedTags"
+      (click)="addSuggestedTag(tag)">
+      {{ tag }}
+    </span>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="button-row">
+    <button type="submit" class="btn-primary">
+      {{ editMode ? 'Speichern' : 'Erstellen' }}
+    </button>
+    <button type="button" class="btn-secondary" (click)="resetForm()">Zurücksetzen</button>
+    <button *ngIf="editMode" type="button" class="btn-cancel" (click)="cancelEdit()">Abbrechen</button>
+  </div>
+
+  <!-- Toast -->
+  <div *ngIf="showToast" class="toast">
+    {{ toastMessage }}
+  </div>
+
+</form>
