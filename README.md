@@ -62,14 +62,14 @@ Die KI prüft Inhalte auf unangemessene Sprache und verhindert das Speichern von
 - **Docker** & **Docker Compose**
 - **cURL** oder **Postman** (für API-Tests)
 - GitHub Container Registry Zugriff (falls Images privat)
-- 
+
+---
+
 #  **Starten mit Dockercompose**
 docker-compose up  
 
 #  **Container löschen**
 docker-compose down 
-
----
 
 ## 🛠️ Lokales Setup mit Docker
 
@@ -116,24 +116,86 @@ docker run -d --name=text-validator --network blog-nw   ghcr.io/fanki/text-valid
 
 ---
 
-## ✅ API-Endpunkte (Beispiele)
+## ✅ API-Endpunkte (Anwendungsfälle)
 
-### 1. Blog erstellen (moderiert)
+### 1. Blog erstellen (SAFE/UNSAFE wird geprüft)
 
 ```bash
-curl -X POST http://localhost:8080/blogs   -H "Content-Type: application/json"   -d '{"title": "Mein Blog", "content": "Das ist ein Blog-Eintrag."}'
+curl -X POST http://localhost:8080/blogs   -H "Content-Type: application/json"   -d '{
+    "title": "Mein erster Blog",
+    "content": "Das ist ein sicherer Blog-Beitrag."
+}'
 ```
 
-### 2. Blog-Eintrag mit unangemessener Sprache
+### 2. Blog erstellen mit unangemessenem Inhalt
 
 ```bash
-curl -X POST http://localhost:8080/blogs   -H "Content-Type: application/json"   -d '{"title": "Test Blog", "content": "hftm sucks."}'
+curl -X POST http://localhost:8080/blogs   -H "Content-Type: application/json"   -d '{
+    "title": "Toxischer Blog",
+    "content": "hftm sucks."
+}'
 ```
 
 ### 3. Alle Blog-Einträge abrufen
 
 ```bash
 curl -X GET http://localhost:8080/blogs
+```
+
+### 4. Blog-Post manuell freischalten
+
+```bash
+curl -X PUT http://localhost:8080/blogs/approve/1
+```
+
+### 5. Blog-Post aktualisieren
+
+```bash
+curl -X PUT http://localhost:8080/blogs/1   -H "Content-Type: application/json"   -d '{
+    "title": "Mein aktualisierter Blog",
+    "content": "Dies ist die überarbeitete Version.",
+    "category": "Technologie",
+    "tags": ["Update", "Tech"]
+}'
+```
+
+### 6. Blog-Post löschen
+
+```bash
+curl -X DELETE http://localhost:8080/blogs/1
+```
+
+### 7. Tags vorschlagen lassen
+
+```bash
+curl -X POST http://localhost:8080/blogs/suggest-tags   -H "Content-Type: application/json"   -d '{
+    "title": "Künstliche Intelligenz",
+    "content": "Einführung in KI und maschinelles Lernen."
+}'
+```
+
+### 8. Tags & Kategorien vorschlagen
+
+```bash
+curl -X POST http://localhost:8080/blogs/suggest-tags-categories   -H "Content-Type: application/json"   -d '{
+    "title": "Reisetipps für 2025",
+    "content": "Hier findest du die Top-Reiseziele für das Jahr 2025."
+}'
+```
+
+### 9. Moderation eines Textes testen
+
+```bash
+curl -X POST http://localhost:8080/blogs/moderate   -H "Content-Type: application/json"   -d '{
+    "title": "Moderationstest",
+    "content": "Beleidigungen sind nicht erlaubt."
+}'
+```
+
+### 10. Ungeprüfte (pending) Blogs anzeigen
+
+```bash
+curl -X GET http://localhost:8080/blogs/pending
 ```
 
 ---
@@ -166,6 +228,15 @@ docker pull ghcr.io/fanki/text-validator:1.0.0-SNAPSHOT
 
 ---
 
+## 🐳 Docker Compose (Optional)
+
+```bash
+docker-compose up
+docker-compose down
+```
+
+---
+
 ## 🎓 Erkenntnisse & Fazit
 
 | Bereich            | Erkenntnis |
@@ -184,3 +255,4 @@ docker pull ghcr.io/fanki/text-validator:1.0.0-SNAPSHOT
 - [Redpanda Kafka](https://redpanda.com)
 - [Docker Compose](https://docs.docker.com/compose/)
 - ChatGPT (Ideen & Code-Hilfen)
+
