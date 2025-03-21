@@ -20,39 +20,118 @@ Die KI prüft Inhalte auf unangemessene Sprache und verhindert das Speichern von
   - Kafka-Kommunikation via Redpanda
   - Frontend mit Angular (optional)
 
+
 ---
 
-## ✅ Funktionsumfang
 
-### 🚀 Backend-Funktionen
+Die wichtigsten Funktionen im Überblick:
 
-| Funktion                          | Beschreibung |
-|-----------------------------------|--------------|
-| **Blog-Post erstellen**          | Erstellung eines Blog-Posts mit Moderation durch die KI. |
-| **Moderation**                   | Jeder Blog-Post wird von einer KI auf problematische Inhalte überprüft. |
-| **Freigabe-Status (approved)**   | Posts werden nur bei erfolgreicher Moderation automatisch freigegeben. |
-| **Kafka-Validierung**            | Sendet den Post-Inhalt zur asynchronen Validierung an einen separaten Text-Validator-Service. |
-| **Zusammenfassung generieren**   | Eine KI erstellt automatisch eine Zusammenfassung des Blog-Posts. |
-| **Schlagwörter vorschlagen**     | Bis zu 5 Tags werden per KI generiert und dem Blog-Eintrag hinzugefügt. |
-| **Kategorie zuweisen**           | Die KI wählt eine passende Kategorie basierend auf dem Inhalt. |
-| **Bearbeiten eines Blog-Posts**  | Ein Blog-Post kann bearbeitet werden. Dabei werden alle KI-Dienste neu aufgerufen. |
-| **Löschen eines Blog-Posts**     | Entfernt einen bestehenden Post aus der Datenbank. |
-| **Manuelles Freigeben (approve)**| Ein Blog-Post, der als `UNSAFE` moderiert wurde, kann manuell freigeschaltet werden. |
-| **Abfrage aller Blog-Posts**     | Liefert alle Blog-Einträge zurück. |
-| **Filterung im Frontend**        | Suche nach Blogs anhand von Titel, Tags oder Kategorie (Frontend-Funktion). |
+✅ **Erstellen, Bearbeiten, Löschen und Abrufen von Blogposts**  
+✅ **KI-gestützte Moderation** – automatische Prüfung auf unangemessene Inhalte  
+✅ **Automatische Zusammenfassung** neuer Blog-Einträge  
+✅ **Schlagwort- und Kategorie-Vorschläge** für bessere Organisation  
+✅ **Kafka-basierte Validierung mit Redpanda**  
+✅ **Frontend (Angular)** für intuitive Bedienung und Filterung nach Titel, Tags, Kategorien  
+✅ **Docker-Container** für eine einfache lokale Ausführung
 
-### 🧠 Text-Validator-Funktionen (Kafka Consumer)
+# 📁 Projektstruktur
 
-| Funktion                | Beschreibung |
-|-------------------------|--------------|
-| **Kafka Consumer**      | Empfängt `validation-request` Nachrichten. |
-| **Moderation erneut prüfen** | Prüft, ob ein Text `SAFE` oder `UNSAFE` ist und sendet das Ergebnis zurück über `validation-response`. |
+Das Projekt folgt einer modularen Struktur mit drei Hauptkomponenten:  
+**blog-backend**, **text-validator**, **blog-frontend**.
 
-### 💾 Datenbank
+```
+BLOG-BACKEND/
+├── blog-backend/                 # Quarkus Backend API mit KI-Services
+│   └── src/main/java/com/example
+│       ├── boundry               # REST-Ressourcen (API)
+│       │   └── BlogResource.java
+│       ├── control               # KI-Services via LangChain4J
+│       │   ├── CategorySuggestionService.java
+│       │   ├── ModerationService.java
+│       │   ├── SummaryService.java
+│       │   └── TagSuggestionService.java
+│       ├── entity                # Datenbank-Entität
+│       │   └── BlogEntry.java
+│       └── messaging             # Kafka-Datenklassen
+│           ├── ValidationRequest.java
+│           └── ValidationResponse.java
+│
+├── blog-frontend/                # Angular Frontend
+│   └── src/app
+│       ├── blog-form             # Komponente zum Erstellen/Bearbeiten von Blogposts
+│       │   ├── blog-form.component.html
+│       │   ├── blog-form.component.scss
+│       │   └── blog-form.component.ts
+│       ├── blog-list             # Liste und Filterung der Blogposts
+│       │   ├── blog-list.component.html
+│       │   ├── blog-list.component.scss
+│       │   └── blog-list.component.ts
+│       ├── app.component.ts
+│       └── weitere Angular-Dateien
+│
+├── text-validator/               # Separater Kafka Consumer Service
+│   └── src/main/java/main/java
+│       ├── ValidationProcessor.java
+│       ├── ValidationRequest.java
+│       └── ValidationResponse.java
+│
+├── docker-compose.yml            # Startet das gesamte System
+├── README.md                     # Dokumentation & Setup
+└── secrets.env                   # Umgebungsvariablen
+```
 
-| Komponente  | Beschreibung |
-|-------------|--------------|
-| **MySQL**   | Persistiert Blog-Daten inkl. Feldern `approved`, `summary`, `tags` und `category`. |
+---
+
+# 🗂️ Beschreibung der Verzeichnisse & Komponenten
+
+### `boundry`  
+Beinhaltet die **REST-Ressourcen** (`BlogResource.java`) für das CRUD-Management von Blogposts. Hier werden alle API-Endpunkte definiert.
+
+### `control`  
+Beinhaltet die **Service-Klassen**, die mit **LangChain4J** verbunden sind. Diese sorgen für:
+- **KI-Moderation** (ModerationService)
+- **Kategorie-Vorschläge** (CategorySuggestionService)
+- **Tag-Vorschläge** (TagSuggestionService)
+- **Automatische Zusammenfassungen** (SummaryService)
+
+### `entity`  
+Die zentrale Entität `BlogEntry.java`, welche die Datenbank-Repräsentation eines Blogposts beschreibt.
+
+### `messaging`  
+Kafka-Nachrichtenklassen, die zwischen Backend und Text-Validator ausgetauscht werden:
+- `ValidationRequest`  
+- `ValidationResponse`  
+
+### `blog-frontend`  
+Das Angular-Frontend, mit zwei Hauptkomponenten:
+- `blog-form`: Zum Erstellen und Bearbeiten von Blogposts inkl. KI-gestützter Vorschläge  
+- `blog-list`: Zum Anzeigen und Filtern der vorhandenen Blogposts
+
+### `text-validator`  
+Ein **Kafka Consumer Service**, der eingehende `validation-request`-Nachrichten verarbeitet und die Freigabe (`SAFE` / `UNSAFE`) via `validation-response` zurückmeldet.
+
+### `application.properties`  
+Die Konfigurationsdateien für Quarkus und Kafka (Broker, Topics, DB-Zugriff usw.).
+
+### `docker-compose.yml`  
+Startet das komplette System:
+- MySQL-Datenbank
+- Redpanda (Kafka)
+- Backend und Text-Validator Container
+- (Frontend optional separat)
+
+---
+
+## 📝 Entitätsklassen
+
+### `BlogEntry`  
+Repräsentiert einen Blogpost in der Anwendung:  
+- `title`: Titel des Blogposts  
+- `content`: Inhalt  
+- `summary`: Automatische Zusammenfassung (KI)  
+- `tags`: KI-generierte Schlagwörter  
+- `category`: KI-generierte Kategorie  
+- `approved`: Moderations-Status (SAFE/UNSAFE)
 
 ---
 
@@ -116,7 +195,18 @@ docker run -d --name=text-validator --network blog-nw   ghcr.io/fanki/text-valid
 
 ---
 
-## ✅ API-Endpunkte (Anwendungsfälle)
+# ✅ API-Endpunkte (Anwendungsfälle)
+
+## 🧪 API-Endpunkte & Testen
+
+Verfügbare Endpunkte (alle im BlogResource.java implementiert):
+- `POST /blogs` → Blogpost erstellen (inkl. KI-Moderation & Vorschläge)  
+- `GET /blogs` → Alle Blogs abrufen  
+- `PUT /blogs/{id}` → Blog aktualisieren  
+- `DELETE /blogs/{id}` → Blog löschen  
+- `PUT /blogs/approve/{id}` → Manuelle Freigabe eines Blogs  
+- `GET /blogs/pending` → Alle abgelehnten / noch nicht freigegebenen Blogs abrufen  
+- `POST /blogs/suggest-tags-categories` → Vorschläge für Tags/Kategorie (Frontend-Nutzung)
 
 ### 1. Blog erstellen (SAFE/UNSAFE wird geprüft)
 
