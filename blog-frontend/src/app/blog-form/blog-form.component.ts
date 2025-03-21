@@ -36,18 +36,15 @@ export class BlogFormComponent {
   @Output() editCanceled = new EventEmitter<void>();
   @Input() blogToEdit?: Blog;
 
-  // Form Felder
   title = '';
   content = '';
   category = '';
   selectedTags: string[] = [];
 
-  // Vorschläge
   suggestedTags: string[] = [];
 
-  // UI State
   editMode = false;
-  editingBlogId: number | null = null; // 🔧 ID speichern für updatePost()
+  editingBlogId: number | null = null; 
 
   showToast = false;
   toastMessage = '';
@@ -64,16 +61,13 @@ export class BlogFormComponent {
   
     const blogText = `${this.title.trim()} ${this.content.trim()}`;
   
-    // 1️⃣ Moderation prüfen BEVOR Blog gespeichert wird!
     this.blogService.moderateBlog(this.title, this.content).subscribe({
       next: (moderationResult) => {
         if (!moderationResult.safe) {
-          // 2️⃣ UNSAFE → Zeige Popup & brich ab!
           this.dialog.open(ModerationDialogComponent);
-          return;   // Blog NICHT speichern!
+          return;  
         }
-  
-        // 3️⃣ SAFE → Speichern!
+        
         const newBlog = {
           title: this.title.trim(),
           content: this.content.trim(),
