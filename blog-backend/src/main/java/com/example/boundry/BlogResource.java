@@ -67,16 +67,14 @@ public class BlogResource {
 
     @Transactional
     void persistBlogEntry(BlogEntry entry) {
-        entry.approved = false; // Standard: blockiert
+        entry.approved = false;
 
-        // 1. Zusammenfassung erzeugen
         try {
             entry.summary = summaryService.summarize(entry.title + " " + entry.content);
         } catch (Exception e) {
             LOGGER.warn("Fehler bei Zusammenfassung", e);
         }
 
-        // 2. Tags & Kategorien vorschlagen
         try {
             String tagsJson = tagSuggestionService.suggestTags(entry.title + " " + entry.content);
             entry.tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {
@@ -92,7 +90,6 @@ public class BlogResource {
             LOGGER.error("Fehler bei Kategorie-Zuordnung", e);
         }
 
-        // 3. Moderation prüfen
         try {
             String moderationResult = moderationService.moderate(entry.title + " " + entry.content);
             LOGGER.infof("Moderationsergebnis: %s", moderationResult);
@@ -161,69 +158,64 @@ public class BlogResource {
     }
 
     @PUT
-@Path("/{id}")
-@Transactional
-public Response updateBlog(@PathParam("id") Long id, BlogEntry updatedEntry) {
-    BlogEntry existingEntry = BlogEntry.findById(id);
+    @Path("/{id}")
+    @Transactional
+    public Response updateBlog(@PathParam("id") Long id, BlogEntry updatedEntry) {
+        BlogEntry existingEntry = BlogEntry.findById(id);
 
-    if (existingEntry == null) {
-        return Response.status(Response.Status.NOT_FOUND).build();
-    }
-
-    // 1️⃣ Titel und Inhalt aktualisieren
-    existingEntry.title = updatedEntry.title;
-    existingEntry.content = updatedEntry.content;
-
-    String blogText = updatedEntry.title + " " + updatedEntry.content;
-
-    // 2️⃣ KI-gestützte Zusammenfassung neu erzeugen
-    try {
-        existingEntry.summary = summaryService.summarize(blogText);
-    } catch (Exception e) {
-        LOGGER.warn("Fehler bei Zusammenfassung (Update)", e);
-        existingEntry.summary = "Fehler beim Erzeugen der Zusammenfassung.";
-    }
-
-    // 3️⃣ Tags neu berechnen
-    try {
-        String tagsJson = tagSuggestionService.suggestTags(blogText);
-        existingEntry.tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {});
-    } catch (Exception e) {
-        LOGGER.error("Fehler bei Tag-Generierung (Update)", e);
-        existingEntry.tags = List.of();
-    }
-
-    // 4️⃣ Kategorie neu zuordnen
-    try {
-        String category = categorySuggestionService.suggestCategory(blogText);
-        existingEntry.category = category;
-    } catch (Exception e) {
-        LOGGER.error("Fehler bei Kategorie-Zuordnung (Update)", e);
-        existingEntry.category = "Unkategorisiert";
-    }
-
-    try {
-        String moderationResult = moderationService.moderate(blogText);
-        LOGGER.infof("Moderationsergebnis (Update): %s", moderationResult);
-
-        if ("SAFE".equalsIgnoreCase(moderationResult.trim())) {
-            existingEntry.approved = true;
-        } else {
-            existingEntry.approved = false;
-            LOGGER.warn("Blog-Post enthält problematische Inhalte und muss manuell geprüft werden.");
+        if (existingEntry == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-    } catch (Exception e) {
-        LOGGER.error("Fehler bei der Moderation (Update)", e);
-        existingEntry.approved = false;
+        existingEntry.title = updatedEntry.title;
+        existingEntry.content = updatedEntry.content;
+
+        String blogText = updatedEntry.title + " " + updatedEntry.content;
+
+        try {
+            existingEntry.summary = summaryService.summarize(blogText);
+        } catch (Exception e) {
+            LOGGER.warn("Fehler bei Zusammenfassung (Update)", e);
+            existingEntry.summary = "Fehler beim Erzeugen der Zusammenfassung.";
+        }
+
+        try {
+            String tagsJson = tagSuggestionService.suggestTags(blogText);
+            existingEntry.tags = mapper.readValue(tagsJson, new TypeReference<List<String>>() {
+            });
+        } catch (Exception e) {
+            LOGGER.error("Fehler bei Tag-Generierung (Update)", e);
+            existingEntry.tags = List.of();
+        }
+
+        try {
+            String category = categorySuggestionService.suggestCategory(blogText);
+            existingEntry.category = category;
+        } catch (Exception e) {
+            LOGGER.error("Fehler bei Kategorie-Zuordnung (Update)", e);
+            existingEntry.category = "Unkategorisiert";
+        }
+
+        try {
+            String moderationResult = moderationService.moderate(blogText);
+            LOGGER.infof("Moderationsergebnis (Update): %s", moderationResult);
+
+            if ("SAFE".equalsIgnoreCase(moderationResult.trim())) {
+                existingEntry.approved = true;
+            } else {
+                existingEntry.approved = false;
+                LOGGER.warn("Blog-Post enthält problematische Inhalte und muss manuell geprüft werden.");
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Fehler bei der Moderation (Update)", e);
+            existingEntry.approved = false;
+        }
+
+        existingEntry.persist();
+
+        return Response.ok(existingEntry).build();
     }
-
-    // 6️⃣ Speichern
-    existingEntry.persist();
-
-    return Response.ok(existingEntry).build();
-}
-
 
     @DELETE
     @Path("/{id}")
@@ -275,11 +267,9 @@ public Response updateBlog(@PathParam("id") Long id, BlogEntry updatedEntry) {
         }
     }
 
-    // DTO
     public record ModerationResponse(boolean safe) {
     }
 
-    // DTOs für Requests & Responses
     public record TagSuggestionRequest(String title, String content) {
     }
 

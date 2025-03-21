@@ -42,8 +42,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .blog-list {
@@ -134,7 +138,8 @@
   margin-top: 1rem;
 }
 
-.btn-edit, .btn-delete {
+.btn-edit,
+.btn-delete {
   padding: 0.6rem 1.2rem;
   font-size: 0.9rem;
   border: none;
@@ -160,3 +165,41 @@
 .btn-delete:hover {
   background-color: #c82333;
 }
+
+.search-filters {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+
+  .search-field,
+  .filter-field {
+    min-width: 200px;
+  }
+}
+
+.reset-button {
+  background-color: #ffc107; 
+  color: #fff;
+  border: none;
+  padding: 0 1.2rem; 
+  font-size: 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  height: 40px;
+
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.reset-button:hover {
+  background-color: #664d03;
+}
+
+.reset-button:active {
+  background-color: #664d03;
+}
+
